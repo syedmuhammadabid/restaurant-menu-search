@@ -1,10 +1,9 @@
-from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from sentence_transformers import SentenceTransformer
 
 from app.config import settings
 
-_client = QdrantClient(host=settings.qdrant_host, port=settings.qdrant_port)
+_client = settings.get_qdrant_client()
 _model = SentenceTransformer(settings.embedding_model)
 
 

@@ -1,6 +1,5 @@
 import json
 
-from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 from sentence_transformers import SentenceTransformer
 
@@ -25,7 +24,7 @@ def build_text(item: dict) -> str:
 
 
 def ingest():
-    client = QdrantClient(host=settings.qdrant_host, port=settings.qdrant_port)
+    client = settings.get_qdrant_client()
     model = SentenceTransformer(settings.embedding_model)
     items = load_menu(settings.menu_path)
 
