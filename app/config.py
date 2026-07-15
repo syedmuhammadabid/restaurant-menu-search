@@ -12,12 +12,20 @@ class Settings(BaseSettings):
     embedding_dim: int = 384
     menu_path: str = "data/menu.json"
 
-    model_config = {"env_prefix": "APP_"}
+    model_config = {"env_prefix": "APP_", "env_file": ".env", "env_file_encoding": "utf-8"}
 
     def get_qdrant_client(self) -> QdrantClient:
         if self.qdrant_url:
-            return QdrantClient(url=self.qdrant_url, api_key=self.qdrant_api_key)
-        return QdrantClient(host=self.qdrant_host, port=self.qdrant_port)
+            return QdrantClient(
+                url=self.qdrant_url,
+                api_key=self.qdrant_api_key,
+                prefer_grpc=False,
+            )
+        return QdrantClient(
+            host=self.qdrant_host,
+            port=self.qdrant_port,
+            prefer_grpc=False,
+        )
 
 
 settings = Settings()
