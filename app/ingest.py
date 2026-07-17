@@ -25,6 +25,16 @@ def build_text(item: dict) -> str:
 
 def ingest():
     client = settings.get_qdrant_client()
+
+    if client.collection_exists(settings.collection_name):
+        existing = client.count(settings.collection_name).count
+        if existing > 0:
+            print(
+                f"Collection '{settings.collection_name}' already has {existing} "
+                "points. Skipping ingestion."
+            )
+            return
+
     model = SentenceTransformer(settings.embedding_model)
     items = load_menu(settings.menu_path)
 
