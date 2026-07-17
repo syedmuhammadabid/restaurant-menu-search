@@ -52,12 +52,18 @@ restaurant-menu-search/
 │   ├── __init__.py
 │   ├── config.py          # Settings via env vars (APP_ prefix)
 │   ├── ingest.py          # Embed & upsert menu items into Qdrant
-│   ├── main.py            # FastAPI app with /search endpoint
-│   └── search.py          # Vector search logic
+│   ├── main.py            # FastAPI app with /search + /categories
+│   └── search.py          # Vector search + category listing
 ├── data/
 │   └── menu.json          # Cafe Bagalo menu (209 items)
+├── frontend/              # Next.js UI (App Router + Tailwind, dark theme)
+│   ├── app/               # layout, page, global styles
+│   ├── components/        # SearchBar, Filters, ResultCard, ResultsList
+│   ├── lib/               # typed API client + hooks
+│   └── Dockerfile
 ├── scripts/
 │   └── run_ingest.py      # CLI entrypoint for ingestion
+├── docker-compose.yml     # qdrant + api + web
 ├── Dockerfile
 ├── requirements.txt
 └── README.md
@@ -99,6 +105,16 @@ uvicorn app.main:app --reload
 
 The API is now live at `http://localhost:8000` — interactive docs at [`/docs`](http://localhost:8000/docs).
 
+### 5. Run the Frontend (optional)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The UI is live at `http://localhost:3000`. By default the browser talks to the UI's own `/api` route, which proxies to the backend (same-origin — no CORS). The proxy target is set by `API_INTERNAL_URL` (defaults to `http://localhost:8000`, read at runtime); configure both in `frontend/.env.local`.
+
 ---
 
 ## API Usage
@@ -129,6 +145,14 @@ curl "http://localhost:8000/search?q=beef+bbq&max_price=600"
 curl "http://localhost:8000/search?q=family+deal&category=Deals"
 ```
 
+### `GET /categories`
+
+Returns the distinct menu categories (used to populate the UI filter dropdown).
+
+```bash
+curl "http://localhost:8000/categories"
+```
+
 ### Sample Response
 
 ```json
@@ -152,6 +176,19 @@ curl "http://localhost:8000/search?q=family+deal&category=Deals"
 
 ## Docker
 
+Run the full stack (Qdrant + API + Next.js UI) with Compose:
+
+```bash
+docker compose up --build
+```
+
+- UI → `http://localhost:3000`
+- API → `http://localhost:8000`
+
+> The UI proxies API calls through its own `/api` route (`API_INTERNAL_URL=http://api:8000`), so no CORS config or build-time API URL is needed.
+
+Or build just the API image:
+
 ```bash
 docker build -t restaurant-menu-search .
 docker run -e APP_QDRANT_HOST=host.docker.internal -p 8000:8000 restaurant-menu-search
@@ -170,6 +207,14 @@ All settings are overridable via environment variables with the `APP_` prefix:
 | `APP_COLLECTION_NAME` | `menu_items`       | Qdrant collection name   |
 | `APP_EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Sentence Transformer model |
 | `APP_MENU_PATH`       | `data/menu.json`   | Path to menu data        |
+| `APP_CORS_ORIGINS`    | `*`                | Comma-separated allowed frontend origins |
+
+The frontend reads two variables (in `frontend/.env.local`):
+
+| Variable              | Default                 | Description                                            |
+| --------------------- | ----------------------- | ------------------------------------------------------ |
+| `NEXT_PUBLIC_API_URL` | `/api`                  | Browser-facing API base; `/api` uses the built-in proxy (baked at build time) |
+| `API_INTERNAL_URL`    | `http://localhost:8000` | Server-side target the `/api` proxy forwards to (runtime) |
 
 ---
 

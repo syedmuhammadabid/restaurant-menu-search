@@ -1,13 +1,29 @@
 from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 
-from app.search import search_menu
+from app.config import settings
+from app.search import list_categories, search_menu
 
 app = FastAPI(title="Cafe Bagalo Menu Search", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origin_list,
+    allow_credentials=False,
+    allow_methods=["GET"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/categories")
+def categories():
+    items = list_categories()
+    return {"count": len(items), "categories": items}
 
 
 @app.get("/search")

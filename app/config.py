@@ -11,8 +11,13 @@ class Settings(BaseSettings):
     embedding_model: str = "all-MiniLM-L6-v2"
     embedding_dim: int = 384
     menu_path: str = "data/menu.json"
+    cors_origins: str = "*"
 
     model_config = {"env_prefix": "APP_", "env_file": ".env", "env_file_encoding": "utf-8"}
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
     def get_qdrant_client(self) -> QdrantClient:
         if self.qdrant_url:

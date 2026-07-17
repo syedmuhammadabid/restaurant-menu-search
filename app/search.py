@@ -1,3 +1,5 @@
+import json
+
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from sentence_transformers import SentenceTransformer
 
@@ -5,6 +7,19 @@ from app.config import settings
 
 _client = settings.get_qdrant_client()
 _model = SentenceTransformer(settings.embedding_model)
+
+
+def list_categories() -> list[str]:
+    with open(settings.menu_path) as f:
+        items = json.load(f)
+
+    seen: dict[str, None] = {}
+    for item in items:
+        category = item.get("category")
+        if category:
+            seen.setdefault(category, None)
+
+    return sorted(seen)
 
 
 def search_menu(
