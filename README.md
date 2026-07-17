@@ -16,6 +16,20 @@ A natural-language search API that lets users find menu items by describing what
 
 **Example:** Searching *"cheesy burger"* returns Chicken Cheese Burger, Beef Cheese Burger, Zinger Cheese Burger — ranked by semantic relevance.
 
+### Demo
+
+![Restaurant Menu Search demo](restaurant-menu-search.gif)
+
+### Features
+
+- 🔍 **Semantic search** — find items by meaning, not exact keywords, using vector embeddings.
+- 🎯 **Relevance scoring** — every result carries a cosine-similarity score.
+- 🧰 **Rich filtering** — narrow by category and min/max price.
+- ⚡ **FastAPI backend** — typed, async, self-documenting at `/docs`.
+- 🎨 **Next.js frontend** — dark, minimalist UI with debounced live search.
+- 🔒 **Same-origin proxy** — the UI forwards API calls at runtime, so no CORS setup needed.
+- 🐳 **Fully Dockerized** — spin up Qdrant + API + UI with a single `docker compose up`.
+
 ### How It Works
 
 ```
@@ -118,6 +132,16 @@ The UI is live at `http://localhost:3000`. By default the browser talks to the U
 ---
 
 ## API Usage
+
+### Endpoints
+
+| Method | Endpoint      | Description                                  |
+| ------ | ------------- | -------------------------------------------- |
+| `GET`  | `/health`     | Liveness probe — returns `{"status": "ok"}`  |
+| `GET`  | `/categories` | Distinct menu categories (for the UI filter) |
+| `GET`  | `/search`     | Semantic search with optional filters        |
+
+Interactive Swagger docs are available at [`/docs`](http://localhost:8000/docs).
 
 ### `GET /search`
 
